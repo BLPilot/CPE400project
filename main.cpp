@@ -11,7 +11,7 @@ Concurrent File Transfer Algorithm
 using namespace std;
 
 int main(int argc, char *argv[]){
-	if (argc != 2 && argc != 3) {
+	if(!(argc == 2 || argc == 3) {
 	
 		printf("ERROR: Folder not found. Please provide file.\n");
 		exit(EXIT_FAILURE);
