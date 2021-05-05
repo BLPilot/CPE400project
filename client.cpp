@@ -44,8 +44,7 @@ int main()
     sprintf(input_name, "Input_file.txt");
   
     // creating socket
-    sockfd = socket(AF_INET, SOCK_DGRAM,
-                    IP_PROTOCOL);
+    sockfd = socket(AF_INET, SOCK_DGRAM, IP_PROTOCOL);
                     
    if(sockfd <0){
    		perror("Socket creation failed");
@@ -53,23 +52,30 @@ int main()
    }else{
 		cout<<"Socket created succesfully"<<endl;
    }
+   
+   //TCP connection channel, creating connection
+   if(connect(sockfd, (struct sockaddr*) &addr_con, sizeof(addr_con)) < 0){
+    	perror("Connection failed");
+    	exit(EXIT_FAILURE);
+    }else{
+    	cout<<"Connection succesful"<<endl;
+    }
                     
                     
     while (1) {
         cout<<endl<<"Please enter file:"<<endl;
         cin>>net_buf;
-        sendto(sockfd, net_buf, NET_BUF_SIZE,
-               sendrecvflag, (struct sockaddr*)&addr_con,
-               addrlen);
+        sendto(sockfd, net_buf, NET_BUF_SIZE, sendrecvflag, (struct sockaddr*)&addr_con, addrlen);
   
        	cout<<endl<<"Data Received: "<<endl;
   
         while (1) {
-            // receive
+            // receiving file
+            cout<<"Receiving file"<<endl;
             clear(net_buf);
-            n = recvfrom(sockfd, net_buf, NET_BUF_SIZE,
-                              sendrecvflag, (struct sockaddr*)&addr_con,
-                              &addrlen);
+            n = recvfrom(sockfd, net_buf, NET_BUF_SIZE, sendrecvflag, (struct sockaddr*)&addr_con, &addrlen);
+                              
+                        
                               
             
              
@@ -77,11 +83,9 @@ int main()
 			
             
             
-            // process
+            // decrypting file
+            cout<<"decrypting file"<<endl;
             if (receiveFile(net_buf, NET_BUF_SIZE, input_name)) {
-			
-				
-                
                 break;
             }
             

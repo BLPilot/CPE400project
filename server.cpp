@@ -56,6 +56,17 @@ int main()
     }else{
     	cout<<"Server Binding Failed"<<endl;
     }
+    
+    //TCP connection channel 
+    socklen_t TCPsock;
+    
+    if(TCPsock = accept(sockfd, (struct sockaddr*) &addr_con, (socklen_t*)sizeof(addr_con)) == 0){
+    	perror("Connection accepting failed");
+    	exit(EXIT_FAILURE);
+    }else{
+    	cout<<"Connection accepted"<<endl;
+    }
+    
         
   
     while (1) {
@@ -64,9 +75,7 @@ int main()
         // receive file name
         clear(net_buf);
   
-        n = recvfrom(sockfd, net_buf,
-                          NET_BUF_SIZE, sendrecvflag,
-                          (struct sockaddr*)&addr_con, &addrlen);
+        n = recvfrom(sockfd, net_buf, NET_BUF_SIZE, sendrecvflag, (struct sockaddr*)&addr_con, &addrlen);
   
         fp = fopen(net_buf, "r");
         cout<<endl<<"File Name Received:"<<net_buf<<endl;
@@ -77,18 +86,16 @@ int main()
   
         while (1) {
   
-            // process
-            if (sendFile(fp, net_buf, NET_BUF_SIZE)) {
-                sendto(sockfd, net_buf, NET_BUF_SIZE,
-                       sendrecvflag, 
-                    (struct sockaddr*)&addr_con, addrlen);
-                break;
+            // encrypting file
+            cout<<"Encrypting file"<<endl;
+            if (sendFile(fp, net_buf, NET_BUF_SIZE)) { 
+            	sendto(sockfd, net_buf, NET_BUF_SIZE, sendrecvflag, (struct sockaddr*)&addr_con, addrlen);
+            	break;
             }
   
-            // send
-            sendto(sockfd, net_buf, NET_BUF_SIZE,
-                   sendrecvflag,
-                (struct sockaddr*)&addr_con, addrlen);
+            // sending file
+            cout<<"Sending File"<<endl;
+            sendto(sockfd, net_buf, NET_BUF_SIZE, sendrecvflag, (struct sockaddr*)&addr_con, addrlen);
             clear(net_buf);
         }
         if (fp != NULL)
