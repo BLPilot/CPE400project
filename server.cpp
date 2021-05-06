@@ -8,19 +8,20 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <iostream>
+#include <fstream>
+#include <string.h>
   
-#define IP_PROTOCOL 0
-#define PORT_NO 15050
-#define NET_BUF_SIZE 32
+#define PROTOCOL 0
+#define PORT 15050
+#define BUFFER_SIZE 32
 #define cipherKey 2
-#define sendrecvflag 0
 #define nofile "File Not Found!"
 
 using namespace std;
   
 void clear(char* b);
 char Encrypt(char ch); 
-int sendFile(FILE* fp, char* buf, int s);
+int sendFile(FILE* fname, char* buf, int s);
   
 
   
@@ -34,13 +35,13 @@ int main()
     
     //filling server information
     addr_con.sin_family = AF_INET;
-    addr_con.sin_port = htons(PORT_NO);
+    addr_con.sin_port = htons(PORT);
     addr_con.sin_addr.s_addr = INADDR_ANY;
-    char net_buf[NET_BUF_SIZE];
-    FILE* fp;
+    char buffer[BUFFER_SIZE];
+    FILE* fname;
   
     // creating socket
-    sockfd = socket(AF_INET, SOCK_DGRAM, IP_PROTOCOL);
+    sockfd = socket(AF_INET, SOCK_DGRAM, PROTOCOL);
     
     if(sockfd <0){
    		perror("Socket creation failed");
@@ -58,14 +59,15 @@ int main()
     }
     
     //TCP connection channel 
-    socklen_t TCPsock;
+    
+    /*socklen_t TCPsock;
     
     if(TCPsock = accept(sockfd, (struct sockaddr*) &addr_con, (socklen_t*)sizeof(addr_con)) == 0){
-    	perror("Connection accepting failed");
+    	perror("TCP Connection accepting failed");
     	exit(EXIT_FAILURE);
     }else{
-    	cout<<"Connection accepted"<<endl;
-    }
+    	cout<<"TCP Connection accepted"<<endl;
+    }*/
     
         
   
@@ -73,33 +75,50 @@ int main()
         cout<<endl<<"Waiting for file"<<endl;
   
         // receive file name
-        clear(net_buf);
+        clear(buffer);
   
-        n = recvfrom(sockfd, net_buf, NET_BUF_SIZE, sendrecvflag, (struct sockaddr*)&addr_con, &addrlen);
+        n = recvfrom(sockfd, buffer, BUFFER_SIZE, 0, (struct sockaddr*)&addr_con, &addrlen);
   
-        fp = fopen(net_buf, "r");
-        cout<<endl<<"File Name Received:"<<net_buf<<endl;
-        if (fp == NULL)
+        fname = fopen(buffer, "r");
+        cout<<endl<<"File Name Received:"<<buffer<<endl;
+        if (fname == NULL)
             cout<<endl<<"File could not be opened"<<endl;
         else
             cout<<endl<<"File opened"<<endl;
   
+  		
+  	
+  	
+  	
+  	
+  	
         while (1) {
   
             // encrypting file
             cout<<"Encrypting file"<<endl;
-            if (sendFile(fp, net_buf, NET_BUF_SIZE)) { 
-            	sendto(sockfd, net_buf, NET_BUF_SIZE, sendrecvflag, (struct sockaddr*)&addr_con, addrlen);
+            if (sendFile(fname, buffer, BUFFER_SIZE)) { 
+            	sendto(sockfd, buffer, BUFFER_SIZE, 0, (struct sockaddr*)&addr_con, addrlen);
             	break;
             }
   
             // sending file
             cout<<"Sending File"<<endl;
-            sendto(sockfd, net_buf, NET_BUF_SIZE, sendrecvflag, (struct sockaddr*)&addr_con, addrlen);
-            clear(net_buf);
+            sendto(sockfd, buffer, BUFFER_SIZE, 0, (struct sockaddr*)&addr_con, addrlen);
+            
+            
+             //Sending file size using TCP
+  		//char info[32];
+  		//strcpy(info, buffer);
+  		//cout<<"File size sent using TCP ="<<sizeof(buffer)<<" bytes"<<endl;
+  	
+  		//send(sockfd, info, strlen(info), 0); 
+            clear(buffer);
         }
-        if (fp != NULL)
-            fclose(fp);
+        if (fname != NULL)
+            fclose(fname);
+            
+       
+            
     }
     return 0;
 }
@@ -111,7 +130,7 @@ int main()
 // function to clear buffer
 void clear(char* b){
     int i;
-    for (i = 0; i < NET_BUF_SIZE; i++)
+    for (i = 0; i < BUFFER_SIZE; i++)
         b[i] = '\0';
 }
 
@@ -121,9 +140,9 @@ char Encrypt(char ch){
 }
 
 // function sending file
-int sendFile(FILE* fp, char* buf, int s){
+int sendFile(FILE* fname, char* buf, int s){
     int i, len;
-    if (fp == NULL) {
+    if (fname == NULL) {
         strcpy(buf, nofile);
         len = strlen(nofile);
         buf[len] = EOF;
@@ -134,7 +153,7 @@ int sendFile(FILE* fp, char* buf, int s){
   
     char ch, ch2;
     for (i = 0; i < s; i++) {
-        ch = fgetc(fp);
+        ch = fgetc(fname);
         ch2 = Encrypt(ch);
         buf[i] = ch2;
         if (ch == EOF)

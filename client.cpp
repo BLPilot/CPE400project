@@ -10,12 +10,12 @@
 #include <iostream>
 #include <fstream>
   
-#define IP_PROTOCOL 0
-#define IP_ADDRESS "127.0.0.1" // localhost
-#define PORT_NO 15050
-#define NET_BUF_SIZE 32
+#define PROTOCOL 0
+#define ADDRESS "127.0.0.1"
+#define PORT 15050
+#define BUFFER_SIZE 32
 #define cipherKey 2
-#define sendrecvflag 0
+
 
 using namespace std;
   
@@ -35,16 +35,17 @@ int main()
     
     //filling server information
     addr_con.sin_family = AF_INET;
-    addr_con.sin_port = htons(PORT_NO);
-    addr_con.sin_addr.s_addr = inet_addr(IP_ADDRESS);
-    char net_buf[NET_BUF_SIZE];
-    FILE* fp;
+    addr_con.sin_port = htons(PORT);
+    addr_con.sin_addr.s_addr = inet_addr(ADDRESS);
+    char buffer[BUFFER_SIZE];
+    FILE* fname;
     FILE* input;
     char input_name[100];
     sprintf(input_name, "Input_file.txt");
+    
   
     // creating socket
-    sockfd = socket(AF_INET, SOCK_DGRAM, IP_PROTOCOL);
+    sockfd = socket(AF_INET, SOCK_DGRAM, PROTOCOL);
                     
    if(sockfd <0){
    		perror("Socket creation failed");
@@ -54,43 +55,56 @@ int main()
    }
    
    //TCP connection channel, creating connection
-   if(connect(sockfd, (struct sockaddr*) &addr_con, sizeof(addr_con)) < 0){
-    	perror("Connection failed");
+
+   /*if(connect(sockfd, (struct sockaddr*) &addr_con, sizeof(addr_con)) < 0){
+    	perror("TCP Connection failed");
     	exit(EXIT_FAILURE);
     }else{
-    	cout<<"Connection succesful"<<endl;
-    }
+    	cout<<"TCP Connection succesful"<<endl;
+    }*/
                     
                     
     while (1) {
         cout<<endl<<"Please enter file:"<<endl;
-        cin>>net_buf;
-        sendto(sockfd, net_buf, NET_BUF_SIZE, sendrecvflag, (struct sockaddr*)&addr_con, addrlen);
+        cin>>buffer;
+        sendto(sockfd, buffer, BUFFER_SIZE, 0, (struct sockaddr*)&addr_con, addrlen);
+        
+        
+        
   
        	cout<<endl<<"Data Received: "<<endl;
+       	
   
         while (1) {
             // receiving file
             cout<<"Receiving file"<<endl;
-            clear(net_buf);
-            n = recvfrom(sockfd, net_buf, NET_BUF_SIZE, sendrecvflag, (struct sockaddr*)&addr_con, &addrlen);
-                              
+            clear(buffer);
+            n = recvfrom(sockfd, buffer, BUFFER_SIZE, 0, (struct sockaddr*)&addr_con, &addrlen);
+                             
                         
                               
             
              
-          
-			
-            
+  
             
             // decrypting file
             cout<<"decrypting file"<<endl;
-            if (receiveFile(net_buf, NET_BUF_SIZE, input_name)) {
+            if (receiveFile(buffer, BUFFER_SIZE, input_name)) {
                 break;
             }
             
+            //Receiving file size from server using TCP
+            //doesnt receive data
+        	//char received[32];
+        	//int size = read(sockfd, received, 32); 
+        	//cout<<"File data size received from TCP :"<<sizeof(buffer)<<" bytes"<<endl; 
+            
            
         }
+        
+        
+     
+        
         cout<<endl<<endl;
     }
     return 0;
@@ -99,7 +113,7 @@ int main()
 // function to clear buffer
 void clear(char* b){
     int i;
-    for (i = 0; i < NET_BUF_SIZE; i++)
+    for (i = 0; i < BUFFER_SIZE; i++)
         b[i] = '\0';
 }
 

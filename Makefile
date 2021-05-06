@@ -2,6 +2,8 @@
 #
 #
 #
+all: server client
+
 server: server.cpp
 	@echo "=== (first compiling 'server') ==="
 	g++ -o server server.cpp
