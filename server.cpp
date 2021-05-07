@@ -13,7 +13,7 @@
   
 #define PROTOCOL 0
 #define PORT 15050
-#define BUFFER_SIZE 32
+#define BUFFER_SIZE 1024
 #define cipherKey 2
 #define nofile "File Not Found!"
 
@@ -96,14 +96,20 @@ int main()
   
             // encrypting file
             cout<<"Encrypting file"<<endl;
+            cout<<"Sending File"<<endl;
+            
+            
             if (sendFile(fname, buffer, BUFFER_SIZE)) { 
             	sendto(sockfd, buffer, BUFFER_SIZE, 0, (struct sockaddr*)&addr_con, addrlen);
             	break;
             }
   
             // sending file
-            cout<<"Sending File"<<endl;
+           
+            
             sendto(sockfd, buffer, BUFFER_SIZE, 0, (struct sockaddr*)&addr_con, addrlen);
+            cout<<"Size of file being sent: "<<strlen(buffer)<<endl;
+          
             
             
              //Sending file size using TCP

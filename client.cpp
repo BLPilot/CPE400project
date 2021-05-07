@@ -13,7 +13,7 @@
 #define PROTOCOL 0
 #define ADDRESS "127.0.0.1"
 #define PORT 15050
-#define BUFFER_SIZE 32
+#define BUFFER_SIZE 1024
 #define cipherKey 2
 
 
@@ -72,7 +72,7 @@ int main()
         
         
   
-       	cout<<endl<<"Data Received: "<<endl;
+       
        	
   
         while (1) {
@@ -81,23 +81,24 @@ int main()
             clear(buffer);
             n = recvfrom(sockfd, buffer, BUFFER_SIZE, 0, (struct sockaddr*)&addr_con, &addrlen);
                              
-                        
-                              
-            
-             
-  
-            
-            // decrypting file
-            cout<<"decrypting file"<<endl;
-            if (receiveFile(buffer, BUFFER_SIZE, input_name)) {
-                break;
-            }
-            
             //Receiving file size from server using TCP
             //doesnt receive data
         	//char received[32];
         	//int size = read(sockfd, received, 32); 
-        	//cout<<"File data size received from TCP :"<<sizeof(buffer)<<" bytes"<<endl; 
+        	//cout<<"File data size received from TCP :"<<sizeof(buffer)<<" bytes"<<endl;            
+                              
+            
+             cout<<"Size of file being sent: "<<strlen(buffer)<<endl;
+            	
+            // decrypting file
+            cout<<"decrypting file"<<endl;
+            
+            cout<<endl<<"Data Received: "<<endl;
+            if (receiveFile(buffer, BUFFER_SIZE, input_name)) {
+                break;
+            }
+            
+            
             
            
         }
@@ -105,7 +106,7 @@ int main()
         
      
         
-        cout<<endl<<endl;
+        cout<<endl;
     }
     return 0;
 }
